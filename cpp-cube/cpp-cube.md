@@ -1,0 +1,14 @@
+
+
+
+C Plus Plus has a very powerful template system, but most developers don't use it effectively and don't understand how to effectively architect with it, or what changes to it would accomplish. I aim to address this in this series by building a framework with practical examples for how the features work and interact to make it easier to work with.
+
+This framework has a lot in common with the type theorist's Lambda Cube, but I will do my best to avoid using fancy math stuff as much as possible.
+
+To start with, let's characterize C++ without templates at all. This hypothetical version is a Simply Typed language. Types don't interact in any special or interesting way, they just classify the things we do at the object level as integers or strings. We can create structs and variables and functions, and that's still pretty Simple. Though constructing functions is a weird case, because it's sort of an operation that takes multiple other types and combines them into one. (making structs is kinda like that too, but that's different because reasons, and I only need one example here.) C++ has a set of simple type formers, though no actually good syntax for them: the ambifix `const` and `unsigned`, the sorta-postfix `*`, the ultra-postfix `[]`, and I don't even know what to call the function pointer type syntax despite the function type syntax being a fairly tame postfix. C++ also has a syntax for creating structs and classes by combining other types, and for making new type formers via basic templates; While a mathematical purist might consider having templates at all to be a type level binding construct and thus be part of System F underlined \omega rather than simple types, I'm going to classify them as simple for an important reason and mathematicians can just hush for a bit. So at this point we can write things like `vector<int>` and `unordered_map<string, string>` and have that expand into a useful container. If at this point you are thinking about `vector<bool>` or `hash<T>`, please join the mathematicians in being quiet for another couple paragraphs.
+
+The version of C++ we have described so far doesn't have associated types, can't take values as arguments of a template (only types), and can't do template specialization. This puts the power of the type system about on par with Java or C# at the time of writing. Now lets look at how it gets better.
+
+There are a couple features in C++ type system that add new powers: the ability to write `using` inside a template (an associated type), template specialization, and the ability to take values as template arguments and put values as static members of a template type. These expand the system in very different ways, so let's take them one at a time.
+
+Let's start by talking about template specialization; Template specialization allows us to make our 
