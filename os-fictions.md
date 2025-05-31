@@ -278,3 +278,23 @@ What we need for an operating system is a single format that has all of the foll
 - Can represent existing common data representations so that we can have a single common adapter layer that needs to care about a foreign representation and everything else can use the common data features
     - Can freely swap what adapter layer is used if it's interface compatible
     - Don't need to rewrite every protocol and parser in every language
+
+## Fun tricks this lets us do
+
+### Architecture agnostic core dumps
+
+With a forward compatible compact safe serialization system, a cooperative language runtime can mmap a file and take heap and stack dumps in the common structured data format directly into the file, converting function pointers and linked libraries to export references and storing cap refs of external resources with OS facilities. This core dump can then be transmitted to another machine with a different architecture, or loaded with a new version of the software (since machine checkable schemas and type systems can assert that the core dump format is forward compatible) to allow migration of services between machines and upgrading processor architectures.
+
+Making things less tied to specific architectures makes switching architectures in the future easier, allowing us to use better processors that novel architectures enable.
+
+### Script anything, run anywhere
+
+Easy ways to request schemas and pervasive IDE support for them (and a quick project templating system that doesn't adequately exist yet) makes it very easy to start writing a simple script to use various tools, and greatly expands what can be considered "simple" for the purposes of quickly throwing it down. Safe languages and capsec make every script thus written easily given least privileges to make exploiting them both harder and less profitable. Code that's agnostic to where its dependencies and targets live is much easier to deploy and migrate, and with CRDT support we can easily have tools and systems that work locally on every device and follow us around to provide a personal computing environment that's always there without needing an always on cloud service, and delegating heavy compute or storage to a box that's good at that.
+
+You can give your friends access to tiny services you built and collaborate to assemble personal infrastructure that can broadly coordinate with everyone else's, or just trivially pull down prebuilt components without needing to trust them with anything outside their purposes and guarantee they can't phone home.
+
+Transport agnostic caps with peer to peer support allows us to talk to a service without there needing to be a big central corporate cloud service that the links resolve against, and without making configuration any more complicated than drag and drop, plug and play.
+
+### Everything is a notebook
+
+Organize your stuff however makes sense to you, augment the file system with indexed search and tagging, add all the remote sources you want, store data alongside text and tools, pair notes with references to the datasets that let you come to that conclusion, accumulate references to scripts and tool collections with impunity, attach anything to your task and calendar systems, and work with your friends. Grab a cap from a friend in passing and play with it interactively. Fearlessly collaborate on anything. Make your computers work for you, whatever that means.
