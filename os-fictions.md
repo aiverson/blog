@@ -109,70 +109,72 @@ Storing and transmitting data as human readable text also helps making line nois
 
 More seriously, text is useful for being able to plumb tools together; various text formats are easy to pipe from one to the next (more or less). I've been able to write some really convenient scripts that gathers a list of things with one command, filters or gathers it somehow, and then applies an operation to every element with another, using things like xargs or for loops. And to link back to editor/viewer ubiquity, while developing such a pipeline I can always just run part of it and directly inspect what it has in the middle of its work. One of the things I really admire about the design of plan9 and forks is the extension of "everything is text" with "everything is a file", which means that we can, in principle, script absolutely any system facility with simple text and file manipulation commands. For example, plan9 provides a `ps` command very similar to linux's which provides nicely formatted legible output of what processes are running, however pretty formatting makes parsing harder. Instead, `/proc/*/status` provides similar information about the process directly from the kernel on request, in a simple columnar format for easy reading and parsing. I have an example output of these courtesy of [Avery Thorn](https://avery.garden/users/thorn). It looks like this:
 
-> term% cat */status
-> bootrc                      glenda                      Await                 0          30       72110          10          50           0         340          10          10
-> mntgen                      glenda                      Pread                 0           0       72060           0           0           0         184          10          10
-> mntgen                      glenda                      Pread                 0           0       72070           0           0           0         184          10          10
-> mntgen                      glenda                      Pread                 0           0       72070           0           0           0         184          10          10
-> factotum                    glenda                      Rendez               20           0       71680           0           0           0         364          10          10
-> hjfs                        glenda                      Pread                 0          50       71600           0           0           0        7872          10          10
-> hjfs                        glenda                      Rendez               40          30       71590           0           0           0        7872          10          10
-> hjfs                        glenda                      Rendez               10           0       71580           0           0           0        7872          10          10
-> hjfs                        glenda                      Pread                 0           0       71570           0           0           0        7872          10          10
-> hjfs                        glenda                      Sleep                 0           0       71570           0           0           0        7872          10          10
-> cs                          glenda                      Pread                 0           0       71410           0           0           0         204          10          10
-> aoesweep                    glenda                      Wakeme                0           0       72070           0           0           0           0          13          13
-> dns                         glenda                      Pread                10           0       71280           0           0           0         372          10          10
-> timesync                    glenda                      Sleep                 0           0       68140           0           0           0         108          19          19
-> pager                       glenda                      Idle                  0           0       72120           0           0           0           0          13          13
-> rxmitproc                   glenda                      Wakeme                0           0       72080           0           0           0           0          13          13
-> webcookies                  glenda                      Pread                 0           0       68050           0           0           0         208          10          10
-> webfs                       glenda                      Pread                 0           0       68030           0           0           0         232          10          10
-> plumber                     glenda                      Pread                 0          10       68010           0           0           0         328          10          10
-> igmpproc                    glenda                      Wakeme                0           0       72080           0           0           0           0          13          13
-> plumber                     glenda                      Rendez                0           0       68010           0           0           0         328          10          10
-> rc                          glenda                      Pread                 0           0       66960           0          10           0         212          10          10
-> etherread4                  glenda                      Wakeme                0         120       66870           0           0           0           0          13          13
-> etherread6                  glenda                      Wakeme                0           0       66870           0           0           0           0          13          13
-> recvarpproc                 glenda                      Wakeme                0           0       66870           0           0           0           0          13          13
-> ipconfig                    glenda                      Sleep                 0           0       66860           0           0           0         208          10          10
-> listen1                     glenda                      Open                  0          10       66830           0           0           0          48          10          10
-> #I0tcpack                   glenda                      Wakeme                0          40       74980           0           0           0           0          13          13
-> rc                          glenda                      Await                 0          40       72960           0           0           0         216          10          10
-> factotum                    glenda                      Pread                40           0       72930           0           0           0         368          10          10
-> #l0lproc                    glenda                      Wakeme                0           0       80270           0           0           0           0          13          13
-> kbdfs                       glenda                      Pread                 0          10       57870           0           0           0         352          10          10
-> kbdfs                       glenda                      Rendez                0           0       57870           0           0           0         352          10          10
-> kbdfs                       glenda                      Pread                 0          80       57870           0           0           0         352          10          10
-> kbdfs                       glenda                      Rendez                0           0       57870           0           0           0         352          10          10
-> #l0rproc                    glenda                      Wakeme                0         100       80280           0           0           0           0          13          13
-> kbdfs                       glenda                      Rendez                0           0       57880           0           0           0         352          10          10
-> rc                          glenda                      Await                 0           0       57880           0           0           0         212          10          10
-> webcookies                  glenda                      Pread                 0           0       57860           0           0           0         208          10          10
-> webfs                       glenda                      Pread                 0           0       57860           0           0           0         232          10          10
-> plumber                     glenda                      Pread                 0           0       57850           0           0           0         328          10          10
-> plumber                     glenda                      Rendez                0           0       57860           0           0           0         328          10          10
-> mouse                       glenda                      Wakeme                0           0       80330           0           0           0           0          13          13
-> rio                         glenda                      Rendez               20          40       57860           0           0           0         628          10          10
-> rio                         glenda                      Pread                 0         130       57840           0           0           0         628          10          10
-> rio                         glenda                      Pread                10          30       57840           0           0           0         628          10          10
-> rio                         glenda                      Rendez                0           0       57830           0           0           0         628          10          10
-> rio                         glenda                      Pread                10           0       57840           0           0           0         628          10          10
-> stats                       glenda                      Sleep                10          10       57830           0          10           0         240          10          10
-> rc                          glenda                      Await                 0           0       57810           0           0           0         232          10          10
-> stats                       glenda                      Pread                 0           0       57730           0           0           0         200          10          10
-> stats                       glenda                      Pread                 0           0       57730           0           0           0         204          10          10
-> stats                       glenda                      Pread                10          20       57730           0           0           0         244          10          10
-> closeproc                   glenda                      Wakeme                0           0       23980           0           0           0           0          13          13
-> kbdfs                       glenda                      Pread                 0           0       80260           0           0           0         380          16          16
-> kbdfs                       glenda                      Rendez               10          30       80270           0           0           0         380          16          16
-> alarm                       glenda                      Wakeme                0           0       80350           0           0           0           0          13          13
-> kbdfs                       glenda                      Rendez                0           0       80270           0           0           0         380          16          16
-> kbdfs                       glenda                      Pread                 0           0       80270           0           0           0         380          16          16
-> kbdfs                       glenda                      Pread                 0           0       80270           0           0           0         380          16          16
-> kbdfs                       glenda                      Rendez                0           0       80270           0           0           0         380          16          16
-> paqfs                       glenda                      Pread               230          30       80340           0           0           0         780          10          10
-> init                        glenda                      Await                 0          40       80180          60         190           0          88          10          10
+```
+term% cat */status
+bootrc                      glenda                      Await                 0          30       72110          10          50           0         340          10          10
+mntgen                      glenda                      Pread                 0           0       72060           0           0           0         184          10          10
+mntgen                      glenda                      Pread                 0           0       72070           0           0           0         184          10          10
+mntgen                      glenda                      Pread                 0           0       72070           0           0           0         184          10          10
+factotum                    glenda                      Rendez               20           0       71680           0           0           0         364          10          10
+hjfs                        glenda                      Pread                 0          50       71600           0           0           0        7872          10          10
+hjfs                        glenda                      Rendez               40          30       71590           0           0           0        7872          10          10
+hjfs                        glenda                      Rendez               10           0       71580           0           0           0        7872          10          10
+hjfs                        glenda                      Pread                 0           0       71570           0           0           0        7872          10          10
+hjfs                        glenda                      Sleep                 0           0       71570           0           0           0        7872          10          10
+cs                          glenda                      Pread                 0           0       71410           0           0           0         204          10          10
+aoesweep                    glenda                      Wakeme                0           0       72070           0           0           0           0          13          13
+dns                         glenda                      Pread                10           0       71280           0           0           0         372          10          10
+timesync                    glenda                      Sleep                 0           0       68140           0           0           0         108          19          19
+pager                       glenda                      Idle                  0           0       72120           0           0           0           0          13          13
+rxmitproc                   glenda                      Wakeme                0           0       72080           0           0           0           0          13          13
+webcookies                  glenda                      Pread                 0           0       68050           0           0           0         208          10          10
+webfs                       glenda                      Pread                 0           0       68030           0           0           0         232          10          10
+plumber                     glenda                      Pread                 0          10       68010           0           0           0         328          10          10
+igmpproc                    glenda                      Wakeme                0           0       72080           0           0           0           0          13          13
+plumber                     glenda                      Rendez                0           0       68010           0           0           0         328          10          10
+rc                          glenda                      Pread                 0           0       66960           0          10           0         212          10          10
+etherread4                  glenda                      Wakeme                0         120       66870           0           0           0           0          13          13
+etherread6                  glenda                      Wakeme                0           0       66870           0           0           0           0          13          13
+recvarpproc                 glenda                      Wakeme                0           0       66870           0           0           0           0          13          13
+ipconfig                    glenda                      Sleep                 0           0       66860           0           0           0         208          10          10
+listen1                     glenda                      Open                  0          10       66830           0           0           0          48          10          10
+#I0tcpack                   glenda                      Wakeme                0          40       74980           0           0           0           0          13          13
+rc                          glenda                      Await                 0          40       72960           0           0           0         216          10          10
+factotum                    glenda                      Pread                40           0       72930           0           0           0         368          10          10
+#l0lproc                    glenda                      Wakeme                0           0       80270           0           0           0           0          13          13
+kbdfs                       glenda                      Pread                 0          10       57870           0           0           0         352          10          10
+kbdfs                       glenda                      Rendez                0           0       57870           0           0           0         352          10          10
+kbdfs                       glenda                      Pread                 0          80       57870           0           0           0         352          10          10
+kbdfs                       glenda                      Rendez                0           0       57870           0           0           0         352          10          10
+#l0rproc                    glenda                      Wakeme                0         100       80280           0           0           0           0          13          13
+kbdfs                       glenda                      Rendez                0           0       57880           0           0           0         352          10          10
+rc                          glenda                      Await                 0           0       57880           0           0           0         212          10          10
+webcookies                  glenda                      Pread                 0           0       57860           0           0           0         208          10          10
+webfs                       glenda                      Pread                 0           0       57860           0           0           0         232          10          10
+plumber                     glenda                      Pread                 0           0       57850           0           0           0         328          10          10
+plumber                     glenda                      Rendez                0           0       57860           0           0           0         328          10          10
+mouse                       glenda                      Wakeme                0           0       80330           0           0           0           0          13          13
+rio                         glenda                      Rendez               20          40       57860           0           0           0         628          10          10
+rio                         glenda                      Pread                 0         130       57840           0           0           0         628          10          10
+rio                         glenda                      Pread                10          30       57840           0           0           0         628          10          10
+rio                         glenda                      Rendez                0           0       57830           0           0           0         628          10          10
+rio                         glenda                      Pread                10           0       57840           0           0           0         628          10          10
+stats                       glenda                      Sleep                10          10       57830           0          10           0         240          10          10
+rc                          glenda                      Await                 0           0       57810           0           0           0         232          10          10
+stats                       glenda                      Pread                 0           0       57730           0           0           0         200          10          10
+stats                       glenda                      Pread                 0           0       57730           0           0           0         204          10          10
+stats                       glenda                      Pread                10          20       57730           0           0           0         244          10          10
+closeproc                   glenda                      Wakeme                0           0       23980           0           0           0           0          13          13
+kbdfs                       glenda                      Pread                 0           0       80260           0           0           0         380          16          16
+kbdfs                       glenda                      Rendez               10          30       80270           0           0           0         380          16          16
+alarm                       glenda                      Wakeme                0           0       80350           0           0           0           0          13          13
+kbdfs                       glenda                      Rendez                0           0       80270           0           0           0         380          16          16
+kbdfs                       glenda                      Pread                 0           0       80270           0           0           0         380          16          16
+kbdfs                       glenda                      Pread                 0           0       80270           0           0           0         380          16          16
+kbdfs                       glenda                      Rendez                0           0       80270           0           0           0         380          16          16
+paqfs                       glenda                      Pread               230          30       80340           0           0           0         780          10          10
+init                        glenda                      Await                 0          40       80180          60         190           0          88          10          10
+```
 
 Beyond simple single element lists like I discussed earlier, a tab separated value multi column data table like this one can be easily transformed to isolate just what is needed for input to another with a single easy to write command. Which command? Well, I don't quite remember off the top of my head... What do the columns mean and what is valid in them? Well, I'd need to check the docs... Actually, is it tab separated? Can you tell the difference between fixed width space padded fields and tab separated fields visually? So, as useful as having easy-to-parse text as a common interchange format is, "text" isn't actually a format. Text could be parsed many different ways, and the commonly used formats for scripting in linux and plan9 system interfaces are tabular, non-self-describing formats, which means they can't store anything more complex than an array of structs of simple data. This is fine for a lot of the simple data that has been used historically, because a lot of data is actually that shape, and it assumes that people will look up man pages for the meaning of every element because modern IDEs didn't exist and couldn't present autocomplete lists of fields and documentation on the fly between keystrokes, and that people could reliably either hand-roll a parser or use a C library for the format, which is no longer the case as languages safer than C with consequently more restricted ffis proliferate and more complicated data formats are required for more of our data (and as tools get better at presenting layouts that are more legible but more complicated to machine parse (which is one of the things that makes plan9 style "there's just a file that gives the most basic format always there and the friendly tools and scripts use that")). So, while this style/feature/philosophy has been good in it's time and is still used by myself and many others to great effect, we should be able to make something better by now by using our novel ability to expect powerful and rich libraries and language features as well as UI/UX both in TUIs and GUIs to be effectively omnipresent.
 
