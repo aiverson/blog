@@ -101,7 +101,7 @@ To improve performance further, we can reduce the copying required to route and 
 
 Very little of the data being processed by a computer is text; most of it is structured data. Even most data that's nominally text is actually structured data containing text or a serialized format of structured data, possibly both. This has both been loadbearing for much of computational history and caused many problems. Let's first focus on the strengths of this approach before we get into weaknesses and improvements. The usage of "plain text" representations means that someone familiar with the protocol can reliably inspect and author things directly in the protocol using ordinary keyboards and displays without needing additional custom tooling for every single protocol. Essentially, if specialist tools are broken or NYI it's possible to fall back onto generalist tools (as long as you still have the specialist knowledge). This is tremendously valuable when bootstrapping and debugging a protocol or an application using it. We are now at a place in computing where we can (mostly) assume the universal availability of program tools.
 
-I have never in my life used a front panel switch to edit memory, or used a punch card to load a program. I vaguely know how to, because it's neat, but I've never actually been able to physically touch one, and I might not ever get the chance since the Living Computers Museum closed down. Instead, I have doom emacs and vscode on my desktop and laptop as my primary text editors, with vim and nano as backups. I have `bat` to read text files, and rg to search them in bulk. I have multiple minimal text editors on my phone because they're just so light as to be negligible and end up packaged with other stuff. I have diff tools and hex editors that are integrated into my IDEs and ones that stand alone. My editors have language server support providing rich format-specific assistance, autocomplete, and lots of navigation and editing features. Even `nano` has syntax highlighting by default. I have fully reproducible and rollbackable configuration applied universally to my computers, so that if I mess up a configuration, I can essentially always revert it instantly with no fuss, and if I can't I can straight-forwardly burn it down and replace it with an ISO built from another device in (theoretically) under an hour. The backup to my backup that gets invoked if I have somehow borked both of my primaries and my backup so badly that they're unusable simultaneously, is still a more powerful editor than people originally wrote some of the software I use in. Please take a moment to appreciate what a monumental achievement it is for me to be able to say: I will never be without an editor ever again. I will always have my tools. I will never have to read or edit data for a computer without using a computer ever again. When was the last time you didn't have a powerful text editor when you needed one? Has it ever happened to you? Do you even know anyone it has happened to?
+I have never in my life used a front panel switch to edit memory, or used a punch card to load a program. I vaguely know how to, because it's neat, but I've never actually been able to physically touch one, and I might not ever get the chance since the Living Computers Museum closed down. Instead, I have doom emacs and vscode on my desktop and laptop as my primary text editors, with vim and nano as backups. I have `bat` to read text files, and rg to search them in bulk. I have multiple minimal text editors on my phone because they're just so light as to be negligible and end up packaged with other stuff. I have diff tools and hex editors that are integrated into my IDEs and ones that stand alone. My editors have language server support providing rich format-specific assistance, autocomplete, and lots of navigation and editing features. Even `nano` has syntax highlighting by default. I have fully reproducible and rollbackable configuration applied universally to my computers, so that if I mess up a configuration, I can essentially always revert it instantly with no fuss, and if I can't I can straight-forwardly burn it down and replace it with an ISO built from another device in (theoretically) under an hour. The backup to my backup that gets invoked if I have somehow borked both of my primaries and my backup so badly that they're unusable simultaneously, is still a more powerful editor than people originally wrote some of the software I use in. Please take a moment to appreciate what a monumental achievement it is for me to be able to say: I will never be without an editor ever again. I will always have my tools. I will never have to read or edit data for a computer without using a computer ever again. When was the last time you didn't have a powerful text editor when you needed one? Has it ever happened to you? (And did you actually not *have* one or was it just over here but the file is over there and telling the system to use the editor here on the file there is hard?) Do you even know anyone it has happened to?
 
 The usage of plain text and the development of the modern software ecosystem means that I can essentially always have a tool that knows how to read and write absolutely any piece of configuration, code, script, or communication going on in my system. Except for all the ones it can't, we'll get back to that. But still, it's absolutely wonderful to have that ability, and we must never give it up going forwards.
 
@@ -176,6 +176,21 @@ More seriously, text is useful for being able to plumb tools together; various t
 
 Beyond simple single element lists like I discussed earlier, a tab separated value multi column data table like this one can be easily transformed to isolate just what is needed for input to another with a single easy to write command. Which command? Well, I don't quite remember off the top of my head... What do the columns mean and what is valid in them? Well, I'd need to check the docs... Actually, is it tab separated? Can you tell the difference between fixed width space padded fields and tab separated fields visually? So, as useful as having easy-to-parse text as a common interchange format is, "text" isn't actually a format. Text could be parsed many different ways, and the commonly used formats for scripting in linux and plan9 system interfaces are tabular, non-self-describing formats, which means they can't store anything more complex than an array of structs of simple data. This is fine for a lot of the simple data that has been used historically, because a lot of data is actually that shape, and it assumes that people will look up man pages for the meaning of every element because modern IDEs didn't exist and couldn't present autocomplete lists of fields and documentation on the fly between keystrokes, and that people could reliably either hand-roll a parser or use a C library for the format, which is no longer the case as languages safer than C with consequently more restricted ffis proliferate and more complicated data formats are required for more of our data (and as tools get better at presenting layouts that are more legible but more complicated to machine parse (which is one of the things that makes plan9 style "there's just a file that gives the most basic format always there and the friendly tools and scripts use that")). So, while this style/feature/philosophy has been good in it's time and is still used by myself and many others to great effect, we should be able to make something better by now by using our novel ability to expect powerful and rich libraries and language features as well as UI/UX both in TUIs and GUIs to be effectively omnipresent.
 
+Before we move on to that, let's take note of the nice things this model provides:
+- Authentication is a separated concern; no script that just wants to use some resource needs to know how to authenticate for it, the file's just there and the OS handles authenticating for it.
+    - Acquiring/granting authentication to a service is just mapping/mounting a file or using a single "set permission primitive
+- Transport agnostic: an app doesn't need a network stack and can't really know or care whether a file is provided by the kernel, another local service, a local program proxying an out-of-band remote service, or a remote file mount exposing a remote service
+- Software can run anywhere it makes sense to: a script can be run on my machine with local UI and given access to a remote service, or run on a remote machine with local access to the service and a remote connection to my UI
+- General purpose fallbacks/text is forever: if all else fails, I can manually inspect and invoke the protocol with simple omnipresent tools
+- Liskov Substitution: Everything is hidden behind the interface (which is "simple" in some important way) so implementations can be swapped without breaking downstream software
+And some problems
+- Poor standardization: proliferation of fragile ad hoc parsers and serializers puts everyone in compatibility and special case hell
+- Programs given the full authority of their invoker by default
+    - Confused deputy
+- Text is not a format: Stop making me write parsers every time I want a field, please let me use my language and write `foo.name` or whatever.
+- Finding out what a piece of data means or how to use an interface can be hard
+- Stringly typed
+
 Json! Json has field names that explain what each of the columns means, and you can really easily use `jq` to manipulate json, extracting fields as easily as `.x`. More advanced usage of jq can use higher order functions to express powerful manipulations of nested data structures. I actually once got paid for writing a one line jq script that extracted some data from a proprietary json file and produced an ordinary text output. But then the output of that wasn't in json, so I'd need to do string parsing if I wanted to do another data manipulation operation in sequence. Actually, most of my tooling and files aren't in json, so we would need a large suite of converters to switch to json incrementally, and we'd also run into the issue of json not being self-describing enough: let's say you find a json object that looks like `{"x": 7, "y": 4}`; you can tell that it has fields x and y, but can you tell what those mean? What origin are the coordinates relative to? Are they integer grid coordinates in a digital grid, fractional millimeter coordinates on a 3d printer bed, meter coordinates for where to place a stack in a warehouse, or an entry denoting that the seventh person I'm no longer dating had the relationship end for the fourth reason in their respective tables? JSON-LD can come to our assistance, turning our object into `{"@context": {"Pos": "https://schema.org/GeoCoordinates", "x": "https://schema.org/latitude", "y": "https://schema.org/longitude"}, "@type": "Pos", "x": 7, "y": 4}` which unambiguously declares that it represents a lat-lon pair designating a position in a field just north of Ijebu Igbo in Nigeria... I think. Does longitude count east or west? At the time of writing, neither the linked schema nor the wikipedia page it links to actually states directly, but one of the worked examples suggests that a negative longitude corresponds to a western longitude. It has also made our json 10 times longer and thus cost 10 times as many cpu cycles and wire bytes to generate, transfer, and parse, which brings us to the second problem with "text" as a format, besides being underspecified, inconsistent, and difficult to work with; it's extremely high overhead: floating point number parsing is quite expensive, and the field names are usually just wasted space given a schema. Also JSON-LD is only available after retrieving data, not before, so we can't check an operation before running it, and can't provide convenience features for the input of the command because the direction of dataflow is wrong.
 
 RDF-like formats are designed so that we can integrate facts from wherever we find them into a shared ontology and perform data-work on that knowledgebase, they aren't designed to model invoking tools or for caring about whether or not some party should know something, just for assembling all the knowledge available and being able to operate on it regardless of source; they're designed to be able to be bolted onto the side of arbitrary documents to enable machines to read info from them with minimal agreement ahead of time. This is quite useful, but not quite what we want for our ideal operating system, so we'll have to look elsewhere. But let's make note of the valuable properties that this does provide:
@@ -184,6 +199,7 @@ RDF-like formats are designed so that we can integrate facts from wherever we fi
 - it's extensible so that if a single application needs more data than the ontology originally supported it can just add those as nonschematized fields and potentially mark them as schematized later if they later get standardized
 - support for multiple authoritative bodies with separation of concerns
 - Referencing other entities/files/data is meaningful and it is generally possible to actually follow references without problems
+- Can be stuck onto other document or data formats to represent content in a machine readable form and mark what part of the document provides what data.
 Let's also make explicit the shortcomings:
 - too expensive for load bearing services to use, so there's a constant temptation to avoid it on big important core projects, requiring special treatment
 - Assumes single point of authority for information about something and no authority required for reading
@@ -196,6 +212,64 @@ Let's also make explicit the shortcomings:
                 - If you can use subpaths, how do you handle converting names from the json field names and schema relation ids containing non-url-safe characters to paths? Do you use the schema references or json field names?
                 - If you use the whole document, how do you handle concurrent modifications? Which one wins?
                     - Do you have a full CRDT system entirely outside the scope of the protocol standard that needs to be coordinated and implemented in everything that talks to this server?
+    - SPARQL does exist, but that is an entirely separate language
+- Too many formats: in addition to JSON-LD, RDFa and microdata are also widely deployed ways to embed RDF data into hypertext documents, and there are some pages with all three storing different data. The Turtle format is also designed to be embeded in HTML, and there are a half dozen other formats also in use.
 
-So, JSON-LD isn't suitable, what if we use a different JSON schema system?
+So, JSON-LD isn't suitable, what if we use a different JSON schema system? Like Swagger/OpenAPI?
 
+Hmm, perhaps I should get to the point. Swagger/OpenAPI are bad at reusability and interoperability, but they are very nice for figuring out how to use an HTTP/REST application. Also JSON doesn't actually have semantics, just syntax, and that's a whole headache of its own.
+
+What we need for an operating system is a single format that has all of the following properties:
+- Fully schematized with rich doc comments
+- Write the parser/parser generator once per language and reuse it everywhere
+    - Absolutely no ad-hoc/bespoke parsers for the format
+- Not tied to a single language or system (programming or human); acts as if native in all of them
+    - Schema can be fully translated to another language, including field and type names if necessary, without compromising interoperability
+        - ALL primary identifiers in the schema are internally represented as UIDs/GUIDs, and this detail is not intrusive to human use
+        - Mechanically verify that a translation of a schema hasn't changed any machine-relevant details
+    - Can be operated something resembling idiomatically with ordinary language features in shell, scripting, applications, and system languages
+        - Very low syntactic noise for the library and/or generated code and/or operators
+- Can be called and read with mostly existing tooling on existing systems, no "swap the whole world at once or it doesn't work"
+- Moderately expressive type system
+- Forward compatibility
+    - It is easy to write a schema (and software using that schema) that will continue to work when things are added to the schema
+        - It is mechanically checked if a particular change to the schema could break anything anywhere
+    - Versioned interfaces to allow clean compatibility breaks with continued legacy support
+- Shared schemas: A standardizing body can write and publish a schema and everything else can just reference that schema without needing to copy-paste.
+    - Some understanding of regions of authority and separations of concern, that different authorities work on different things and can't unilaterally modify each other's schemas
+- Extensibility: A shared schema can have extension points and the format provides a principled mechanism to attach extra data to it
+    - The extra data is also schematized but may have a different authority than the originating mechanism
+    - This must not require writing FQDN strings.
+- Compact and efficient
+    - Must be really really fast to read and write to avoid the temptation to make a bespoke binary format instead of using just using the common format
+        - Avoiding separate stage and parse phases to be able to zero-copy work directly in a buffer would be ideal
+    - Must compress well for transport
+    - Simple and natural code to use it must be very fast
+- Introspectable with OS support
+    - If we find a message of data or a reference to an interface lying around, we should be able to retrieve the full backing schema (in our native language if available) and know exactly what type it is
+        - Then we should be able to dynamically enumerate and read fields or methods or elements or whatever
+        - There should be well maintained tools for this everywhere that are flexible and powerful and extensible and integrated with other tools as convenient
+    - IT DOESN'T WORK IN ISOLATION
+        - We don't need to do it without the OS
+        - If you find a random most-of-a-message on a wiped/damaged hard drive in the trash, you shouldn't expect to be able to read it
+        - If you intercept a random network packet mid-stream you shouldn't expect to be able to read it
+            - Also most network streams should be encrypted well enough that others can't read them at all
+- Interfaces and ocaps
+    - secure references to objects
+    - free creation of objects
+    - no ambient authority
+- Searchable directory of schemas so that people can find what people already made to facilitate their application
+- Able to represent structured data well enough for ordinary purposes
+    - Structs/records
+    - Arrays
+    - Maps of simple-to-any
+    - All the ordinary primitives
+    - Byte buffers
+    - Text
+- Promise pipelining so we can queue up many requests
+    - Promise pipelining must work on primitives
+- Transport agnostic: can access local or remote resources through whatever connection is convenient without forcing every script or app to care how it connects
+- Essentially everything in the system accessible through the format, system call equivalents, every core service, UI systems, databases, etc.
+- Can represent existing common data representations so that we can have a single common adapter layer that needs to care about a foreign representation and everything else can use the common data features
+    - Can freely swap what adapter layer is used if it's interface compatible
+    - Don't need to rewrite every protocol and parser in every language
