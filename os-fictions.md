@@ -231,6 +231,11 @@ What we need for an operating system is a single format that has all of the foll
         - Very low syntactic noise for the library and/or generated code and/or operators
 - Can be called and read with mostly existing tooling on existing systems, no "swap the whole world at once or it doesn't work"
 - Moderately expressive type system
+- The interchange format of the schema is itself in the format and schematized
+    - Consumable from anything implementing the format
+    - Autogeneratable from other sources of truth with whatever tools
+    - Mechanically checkable
+    - Amenable to graphical structure editors and additional input formats
 - Forward compatibility
     - It is easy to write a schema (and software using that schema) that will continue to work when things are added to the schema
         - It is mechanically checked if a particular change to the schema could break anything anywhere
