@@ -67,7 +67,7 @@ installed, or even before it starts running.
 ## Scheduling
 
 Sometimes, it is useful to impose a time limit upon a task or restrict
-timeslices. Modern Linux and windows have a variety of useful scheduling modes
+timeslices. Modern Linux and Windows have a variety of useful scheduling modes
 and parameters, but they don't always fit the job. For example, it isn't
 possible to reclaim resources from a dead thread that failed to destruct them
 itself before the end of the containing process. The existence of the threads in
