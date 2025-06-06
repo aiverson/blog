@@ -23,4 +23,3 @@ flakes-cross is a proposal for a minimal fix to nix cross compilation and flake 
 social-technical-version-control is a response to complaints about version control systems (and coordination systems more generally) and speculation about possible future technology for them.
 
 rpc-standard is a description of problems with current networking and IPC systems and technical solutions to make a better future standard; currently it focuses on capturing a high level view of the problems and my proposed fixes to hopefully prompt other developers and researchers to experiment and expand on them, so that my WIP actual specs and libraries can be reviewed and checked and tested by more people when I release them.
-.
