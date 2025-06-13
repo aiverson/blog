@@ -1,0 +1,30 @@
+
+
+CRDTs are very cool. They're a very convenient mechanism allowing multiple sources to asyncronously edit a datastore locally and share the changes globally whenever convenient. This allows instant response local reads and writes while ensuring eventual consistency and that edits do something coherent when combined (where the allowed edits and what coherent thing they do when combined is defined by the CRDT implementation). There's been a lot of research into CRDTs and we have some very nice CRDT primitives now, with sequence and map and shelf CRDTs, a variety of kinds of register CRDTs with different merging behaviors, the antimatter history pruning algorithm, ways to assemble CRDTs into larger datastructures, several ways to express how the sync works, etc. However, making a CRDT that fits some specific more complicated usecase is still difficult, and we don't have some kind of overarching mathematical theory that allows anyone to quickly assemble a CRDT given a set of methods it should support and convergence requirements. So that makes things a bit complicated for writing small utilities and components to coordinate systems. This post isn't about how to make better CRDTs, this is about all the other stuff we can do to make infrastructure that synergizes with CRDTs and mitigates those problems.
+
+The fundamental technologies I'll be discussing here are Persistent Datastructures, OCap-like rpc systems, Self-adjusting computations, and recursion schemes.
+
+## Overview of Component Technologies
+
+If you're already familiar with them, feel free to skip these sections
+
+### Recursion Schemes
+
+A recursion scheme is a way to make recursion more structured and reusable, separating certain patterns of recursion from the behavior being done recursively. The salient part here is the ability to represent recursive datastructures as fixed points of functors rather than undifferentiated recursion. Please don't pay too much attention to the syntax of the following examples, it's made up and not trying to be implementable, just concise and legible (Someone who is less functional-brained than me needs to rewrite this syntax for people who haven't already encountered recursion schemes in more C-like fashion). Instead of representing a sorted binary tree as `Tree(T) = | Node{left: Tree(T), center: T, right: Tree(T)} | Empty` we can represent it as `TreeF(R, T) = | Node{left: R, center: T, right: R} | Empty; Tree = Fix(TreeF)`. This allows factoring "recurse down the tree" out of "do a recursive operation on the tree" so that turning the tree into a sorted list which might look like `tolist(t) = match t |Node{left, center, right} -> tolist(left) ++ center ++ tolist(right) | Empty -> []` can be reduced to `tolist = hylo \|Node{left, center, right} -> left ++ [center] ++ right |Empty -> []`. `hylo` is a recursion scheme, a general purpose recursion operator that can work on any datastructure defined as a single fixed point of something we have a map operation for (a Functor), which in this case is TreeF(R). The benefits of not needing to write the recursive calls become more visible the more recursive calls are involved, which is connected to how complicated the datastructure is, which makes showing them in small examples that fit in a paragraph difficult. To see more information about how to use them in various real languages and on larger scales or for broader tasks, see all the previous posts about these topics [provide links]. This post won't focus on them outside the narrow usage required for it.
+
+### OCap-like rpc systems
+
+Being able to invoke methods on objects remotely, send structured data over the network, and hold references to remote objects to refer to later.
+
+### Persistent Datastructures
+
+A persistent datastructure is a special kind of immutable datastructure that implements mutation operations for the mutable version of the collection in logarithmic time, returning an updated version. For example, instead of an array backed list, which provides constant time get and set operations anywhere in the list, constant time split into slices, and an amortized constant append to the end of the list, and nothing else efficient, it's possible to use an RRB vector or a 2-3 finger tree which provide logarithmic gets, sets, and appends anywhere and constant time of the same at both ends (don't yell at me for that simplification), as well as logarithmic time list split and concatenation. There also exist corresponding persistent datastructures for both hashed and sorted sets and maps, filling out the standard set of elementary collection types.
+
+By nature of those performance properties, Persistent datastructures must necessarily be trees, so that a mutation operation reduces to replacing a single path from the root, which produces sharing on everything outside of the mutated path with previous versions. This makes storing histories of edits on persistent datastructures is actually quite cheap, similar to CRDTs, but less algorithmically complicated and significantly more flexible. A consequence of this is that any set of updates (a delta) on a persistent datastructure can always be distilled into a set of new nodes with references to existing nodes and is guaranteed to be no larger than a full copy and no larger than linearithmic in the updates and size: `O(min(sizeTotal, sizeChanged * log(sizeTotal)))` for a single container.
+
+### Self-Adjusting Computation
+
+Self-adjusting computation is a computational formalism which keeps track of a trace for how the computation executed and can skip over any section of the computation that won't have been affected by a change in the input. It can be implemented as either a dedicated language which can be written just as ordinary code but makes everything self-adjusting, or as a DSL/library in an existing language which makes the self adjusting primitives available and requires the programmers to follow the discipline of using it. (Or, it could be implemented with a Categorifier in languages that offer that or a Modular Semantic in Alicorn.)
+
+## The actual mechanism
+
