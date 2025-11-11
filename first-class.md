@@ -34,7 +34,7 @@ Semantics - Recently developed as a restricted second class feature but not yet 
 Compiler targets - Extensively described as second class but only few sporadic examples reaching towards first class.
 Traits - One aspect seems well researched in proof assistants, another seems almost entirely unexplored.
 Coeffects - Implemented as a second class feature in many cases, theory for modular second class semantics that could easily be extended for first class, but not implemented first class yet.
-Runtime safety/precondition/invariant checks - Well developed in the paper "Dynamically Typed Dependent Types", then seemingly abandoned before reaching wider usage.
+Runtime safety/precondition/invariant checks - Well developed theoretically in the paper "Dynamically Typed Dependent Types", non-theoretically implemented in Nickel, and seemingly entirely abandoned otherwise with nothing in between.
 
 ## The Thesis
 
